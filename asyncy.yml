@@ -1,0 +1,9 @@
+commands:
+  get:
+    help: |
+      Make a GET request to the GitHub REST API
+    args:
+      - name: query
+        type: string
+
+volume: false
