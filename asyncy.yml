@@ -3,7 +3,16 @@ commands:
     help: |
       Make a GET request to the GitHub REST API
     args:
+      - name: request
+        type: string
+  graphql:
+    help: |
+      Query GitHub GraphQL
+    args:
       - name: query
         type: string
 
 volume: false
+
+env:
+  API_TOKEN:
