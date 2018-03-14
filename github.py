@@ -2,17 +2,21 @@
 
 import os
 import sys
+import json
 import requests
 
 
 def main(command, query):
+    headers = {
+        'Authorization': 'token %s' % os.getenv('API_TOKEN'),
+        'User-Agent': os.getenv('USER_AGENT')
+    }
     if command == 'get':
         uri = "https://api.github.com%s" % (query)
-        r = requests.get(uri)
+        r = requests.get(uri, headers=headers)
         return r.text
 
     if command == 'graphql':
-        headers = {'Authorization': 'token %s' % os.environ['API_TOKEN']}
         r = requests.post('https://api.github.com/graphql', json.dumps({"query": query}), headers=headers)
         return r.text
 
