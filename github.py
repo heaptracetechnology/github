@@ -30,7 +30,7 @@ def main(command, query, body):
         sys.stderr.write(res.text)
         raise
     else:
-        return r.text
+        return res.text
 
 if __name__ == '__main__':
     print(main(sys.argv[1], sys.argv[2], sys.argv[3]))
