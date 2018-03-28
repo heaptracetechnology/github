@@ -9,7 +9,7 @@ import requests
 def main(command, query, body):
     headers = {
         'Authorization': 'token %s' % os.getenv('API_TOKEN'),
-        'User-Agent': os.getenv('USER_AGENT')
+        'User-Agent': os.getenv('USER_AGENT', 'Asyncy')
     }
 
     if command == 'get':
