@@ -23,9 +23,14 @@ def main(command, query, body):
     if command == 'graphql':
         uri = 'https://api.github.com/graphql'
         res = requests.post(uri, json.dumps({"query": query}), headers=headers)
-
-    res.raise_for_status()
-    return r.text
+    
+    try:
+        res.raise_for_status()
+    except:
+        sys.stderr.write(res.text)
+        raise
+    else
+        return r.text
 
 if __name__ == '__main__':
     print(main(sys.argv[1], sys.argv[2], sys.argv[3]))
