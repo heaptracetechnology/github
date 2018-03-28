@@ -29,7 +29,7 @@ def main(command, query, body):
     except:
         sys.stderr.write(res.text)
         raise
-    else
+    else:
         return r.text
 
 if __name__ == '__main__':
