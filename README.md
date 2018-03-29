@@ -2,7 +2,9 @@
 
 
 ```sh
-# usage.story
-gh = github get "/search/users?q={{email}} in:email"
-print gh.items.id
+# Use RestAPI
+res = github get "/search/users?q={{email}} in:email"
+
+# Use GraphQL
+res = github graphql query
 ```

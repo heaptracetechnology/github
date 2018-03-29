@@ -1,8 +1,6 @@
-FROM          alpine:3.7
+FROM          jfloff/alpine-python
 
-ADD           install.sh /install.sh
-ADD           entrypoint.sh /entrypoint.sh
-ADD           github.py /github.py
-RUN           /install.sh && rm -f /install.sh
+ADD           app.py /app.py
+RUN           pip install requests
 
-ENTRYPOINT   ["/entrypoint.sh"]
+ENTRYPOINT   ["python", "/app.py"]

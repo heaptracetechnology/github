@@ -20,8 +20,6 @@ commands:
       - name: query
         type: string
 
-volume: false
-
 env:
   API_TOKEN:
   USER_AGENT:
