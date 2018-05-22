@@ -29,16 +29,16 @@ class GitHub:
             return res.json()
 
     @staticmethod
-    def get(query):
+    def get(endpoint):
         return GitHub._query(
-            '/'.join([GitHub.rest_url, query.lstrip('/')]), 'get'
+            '/'.join([GitHub.rest_url, endpoint.lstrip('/')]), 'get'
         )
 
     @staticmethod
-    def post(query, body):
+    def post(endpoint, data):
         return GitHub._query(
-            '/'.join([GitHub.rest_url, query.lstrip('/')]), 'post',
-            data=body
+            '/'.join([GitHub.rest_url, endpoint.lstrip('/')]), 'post',
+            data=data
         )
 
     @staticmethod
@@ -50,4 +50,9 @@ class GitHub:
 
 
 if __name__ == '__main__':
-    sys.stdout.write(json.dumps(getattr(GitHub, sys.argv[1])(*sys.argv[2:])))
+    command = sys.argv[1]
+    kwargs = json.loads(sys.argv[2])
+
+    res = getattr(GitHub, command)(**kwargs)
+
+    sys.stdout.write(json.dumps(res))

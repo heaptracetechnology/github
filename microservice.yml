@@ -1,0 +1,25 @@
+commands:
+  get:
+    help: Make a GET request to the GitHub REST API
+    arguments:
+      - name: endpoint
+        type: string
+  post:
+    help: Make a POST request to GitHub REST API
+    arguments:
+      - name: endpoint
+        type: string
+      - name: data
+        type: json
+        help: The data to post in the API request body.
+
+  graphql:
+    help: Query GitHub GraphQL
+    arguments:
+      - name: query
+        type: string
+
+environment:
+  API_TOKEN:
+  USER_AGENT:
+    default: 'Not Defined'
