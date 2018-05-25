@@ -1,10 +1,12 @@
 commands:
   get:
+    format: get <json>
     help: Make a GET request to the GitHub REST API
     arguments:
       - name: endpoint
         type: string
   post:
+    format: post <json>
     help: Make a POST request to GitHub REST API
     arguments:
       - name: endpoint
@@ -14,6 +16,7 @@ commands:
         help: The data to post in the API request body.
 
   graphql:
+    format: graphql {query}
     help: Query GitHub GraphQL
     arguments:
       - name: query
