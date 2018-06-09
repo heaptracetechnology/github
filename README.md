@@ -1,10 +1,9 @@
-# GitHub for Asyncy
-
+# GitHub API as a microservice 
 
 ```sh
 # Use RestAPI
-res = github get "/search/users?q={{email}} in:email"
+microservice exec get query:"/search/users?q=... in:email"
 
 # Use GraphQL
-res = github graphql query
+microservice exec graphql query:"..."
 ```
