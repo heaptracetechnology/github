@@ -1,5 +1,7 @@
 # GitHub API as a microservice
 
+[![Open Microservice Guide](https://img.shields.io/badge/OMG-enabled-brightgreen.svg?style=for-the-badge)](https://microservice.guide)
+
 
 ### GitHub APIv3
 ```sh
