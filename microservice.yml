@@ -1,27 +1,39 @@
 commands:
-  get:
-    help: Make a GET request to the GitHub REST API
-    arguemnts:
-      endpoint:
-        type: string
-        required: true
-  post:
-    help: Make a POST request to GitHub REST API
+  api:
+    help: Make an API request to the GitHub REST API
     arguments:
-      endpoint:
-        type: string
+      method:
         required: true
+        type: string
+        enum:
+          - head
+          - get
+          - post
+          - patch
+          - put
+          - delete
+      url:
+        required: true
+        type: string
       data:
-        type: object
+        type: map
         help: The data to post in the API request body.
+      params:
+        type: map
+    output:
+      type: map
+
   graphql:
     help: Query GitHub GraphQL
     arguments:
       query:
         type: string
+    output:
+      type: map
 
 environment:
-  API_TOKEN:
+  OAUTH_TOKEN:
+    help: A user oauth token
     type: string
   USER_AGENT:
     type: string
