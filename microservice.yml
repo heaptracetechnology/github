@@ -31,9 +31,26 @@ commands:
     output:
       type: map
 
+  webhooks:
+    help: Accept GitHub webhooks as events
+    events:
+      push: &event
+        help: Any Git push to a Repository, including editing tags or branches. Commits via API actions that update references are also counted. This is the default event.
+        output:
+          type: map
+      repository:
+        help: Any time a Repository is created, deleted (organization hooks only), archived, unarchived, made public, or made private.
+        <<: *event
+      # add more events here ...
+    run:
+      command: ["FLASK_APP=server.py", "flask", "run"]
+      port: 5000
+
 environment:
   OAUTH_TOKEN:
     help: A user oauth token
+    type: string
+  WEBHOOK_SECRET:
     type: string
   USER_AGENT:
     type: string
