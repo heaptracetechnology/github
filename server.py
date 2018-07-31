@@ -36,7 +36,7 @@ def main():
         os.getenv('OMG_ENDPOINT'),
         headers={'Content-Type': 'application/json'},
         data={
-            'eventType': f'com.github.webhook.{event}',
+            'eventType': event,
             'cloudEventsVersion': '0.1',
             'eventID': request.headers['X-GitHub-Delivery'],
             'eventTime': str(datetime.now()),
