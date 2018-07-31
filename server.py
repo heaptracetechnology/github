@@ -1,13 +1,13 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os
 import hmac
 import json
-import statsd
+import os
 import requests
-from hashlib import sha1
+import statsd
+from datetime import datetime
 from flask import Flask, request, make_response
+from hashlib import sha1
 
 app = Flask(__name__)
 
@@ -36,7 +36,11 @@ def main():
         os.getenv('OMG_ENDPOINT'),
         headers={'Content-Type': 'application/json'},
         data={
-            'event': event,
+            'eventType': f'com.github.webhook.{event}',
+            'cloudEventsVersion': '0.1',
+            'eventID': request.headers['X-GitHub-Delivery'],
+            'eventTime': str(datetime.now()),
+            'contentType': 'application/json',
             'data': json.loads(data)
         }
     )
