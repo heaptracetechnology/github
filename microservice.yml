@@ -41,17 +41,20 @@ commands:
       repository:
         help: Any time a Repository is created, deleted (organization hooks only), archived, unarchived, made public, or made private.
         <<: *event
-      # add more events here ...
+      # TODO add more events here ...
     run:
       command: ["FLASK_APP=server.py", "flask", "run"]
       port: 5000
 
 environment:
+  # TODO github apps
   OAUTH_TOKEN:
-    help: A user oauth token
+    help: A user oauth token.
     type: string
   WEBHOOK_SECRET:
+    help: Used to check the webhook payload signature.
     type: string
   USER_AGENT:
+    help: GitHub requires a the User-Agent header defined.
     type: string
     default: 'Not Defined'

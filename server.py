@@ -3,6 +3,7 @@
 
 import os
 import hmac
+import json
 import statsd
 import requests
 from hashlib import sha1
@@ -33,7 +34,11 @@ def main():
 
     res = requests.post(
         os.getenv('OMG_ENDPOINT'),
-        data=data
+        headers={'Content-Type': 'application/json'},
+        data={
+            'event': event,
+            'data': json.loads(data)
+        }
     )
     res.raise_for_status()
 
