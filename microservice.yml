@@ -76,6 +76,10 @@ commands:
             scope:
               type: list
               help: The resulting scope during login
+            state:
+              type: str
+              help: |
+                The string used for the login state.
     run:
       command: ["FLASK_APP=login.py", "flask", "run"]
       port: 5000

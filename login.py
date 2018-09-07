@@ -39,15 +39,17 @@ def unsubscribe():
     return 'Unsubscribed'
 
 
-@app.route('/<id>')
-def login(id):
+@app.route('/<id>', defaults={'state': None})
+@app.route('/<id>/<state>')
+def login(id, state):
     code = request.args.get('code', '')
     if code:
         res = requests.post(
             f'https://{HOSTNAME}/login/oauth/access_token',
             data={
                 'client_id': CLIENT_ID, 'client_secret': CLIENT_SECRET,
-                'code': code
+                'code': code,
+                'state': state
             },
             headers={
                 'User-Agent': USER_AGENT,
@@ -59,6 +61,7 @@ def login(id):
 
         result = res.json()
         result['scope'] = result['scope'].split(',')
+        result['state'] = state
         data = {
             'eventType': 'github.login',
             'cloudEventsVersion': '0.1',
@@ -83,11 +86,13 @@ def login(id):
 
     else:
         # Redirect user to login at GitHub
+        state = request.args.get('state', '')
         proto = request.headers.get('X-Forwarded-Proto', 'http')
         host = request.headers.get('Host')
         return flask.redirect(
             url(f'https://{HOSTNAME}/login/oauth/authorize',
                 client_id=CLIENT_ID,
                 scope=','.join(subscriptions[id]['data']['scope']),
-                redirect_uri=f'{proto}://{host}/{id}')
+                state=state,
+                redirect_uri=f'{proto}://{host}/{id}/{state}')
         )
