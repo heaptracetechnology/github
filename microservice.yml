@@ -47,11 +47,50 @@ commands:
       command: ["FLASK_APP=server.py", "flask", "run"]
       port: 5000
 
+  oauth:
+    help: GitHub Oauth login server
+    events:
+      login:
+        help: Published after a user logs in via GitHub Oauth
+        arguments:
+          redirect:
+            required: true
+            type: str
+            help: Url to redirect user after login
+          scope:
+            type: list
+            help: |
+              One or more login scopes
+              https://developer.github.com/apps/building-oauth-apps/understanding-scopes-for-oauth-apps
+            default:
+              - read:user
+        output:
+          type: object
+          attributes:
+            access_token:
+              type: string
+              help: The logged in users oauth token. Must be kept secret and should be encripted.
+            token_type:
+              type: string
+              help: The token type. E.g., "bearer"
+            scope:
+              type: list
+              help: The resulting scope during login
+    run:
+      command: ["FLASK_APP=login.py", "flask", "run"]
+      port: 5000
+
 environment:
-  # TODO github apps
-  OAUTH_TOKEN:
-    help: A user oauth token.
+  HOSTNAME:
     type: string
+    help: For GitHub Enterprise. The DNS of where GitHub is nosted. E.g. "git.company.com"
+    default: github.com
+  CLIENT_ID:
+    type: string
+    help: The client ID you received from GitHub. https://github.com/settings/applications/new
+  CLIENT_SECRET:
+    type: string
+    help: The client secret you received from GitHub for your GitHub App.
   WEBHOOK_SECRET:
     help: Used to check the webhook payload signature.
     type: string
