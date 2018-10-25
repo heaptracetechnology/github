@@ -1,4 +1,5 @@
-commands:
+omg: 1
+actions:
   api:
     help: Make an API request to the GitHub REST API
     arguments:
