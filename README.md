@@ -5,19 +5,19 @@
 
 ### GitHub APIv3
 ```sh
-$ omg exec github -c api -a method=get -a url=/user -e OAUTH_TOKEN=foobar
+$ omg exec api -a method=get -a url=/user -e OAUTH_TOKEN=foobar
 ✔ Ran command: `api` with output: {"login":"foobar","id":...
 ```
 
 ### GitHub GraphQL
 ```sh
-$ omg exec github -c graphql -a query='...' -e OAUTH_TOKEN=foobar
+$ omg exec graphql -a query='...' -e OAUTH_TOKEN=foobar
 ✔ Ran command: `graphql` with output: {"data":...
 ```
 
 ### GitHub Webhooks
 ```sh
-$ omg exec github -c webhooks -e WEBHOOK_SECRET=foobar -e OAUTH_TOKEN=foobar
+$ omg subscribe webhooks -e WEBHOOK_SECRET=foobar -e OAUTH_TOKEN=foobar
 ```
 
 Create a server to accept GitHub Webhooks.

@@ -1,4 +1,7 @@
 omg: 1
+lifecycle:
+  startup:
+    command: ["python", "/app/app.py"]
 actions:
   api:
     help: Make an API request to the GitHub REST API
@@ -6,6 +9,8 @@ actions:
       method:
         required: true
         type: string
+        in: requestBody
+        default: get
         enum:
           - head
           - get
@@ -16,42 +21,80 @@ actions:
       url:
         required: true
         type: string
+        in: requestBody
       data:
         type: map
+        in: requestBody
         help: The data to post in the API request body.
       params:
         type: map
+        in: requestBody
+      headers:
+        type: map
+        in: requestBody
+      token:
+        type: string
+        help: A oauth user access token to use during the request for authentication.
+        in: requestBody
     output:
       type: map
+    http:
+      contentType: application/json
+      port: 8000
+      method: post
+      path: /api
 
   graphql:
     help: Query GitHub GraphQL
     arguments:
       query:
         type: string
+        in: requestBody
         required: true
+      headers:
+        type: map
+        in: requestBody
+      token:
+        type: string
+        help: A oauth user access token to use during the request for authentication.
+        in: requestBody
     output:
       type: map
+    http:
+      contentType: application/json
+      port: 8000
+      method: post
+      path: /graphql
 
   webhooks:
     help: Accept GitHub webhooks as events
     events:
-      push: &event
-        help: Any Git push to a Repository, including editing tags or branches. Commits via API actions that update references are also counted. This is the default event.
+      accept:
+        arguments:
+          events:
+            type: list
+            in: requestBody
+            help: |
+              List events to subscribe too.
+              See full list here https://developer.github.com/webhooks/#events
+              Default is all events.
         output:
           type: map
-      repository:
-        help: Any time a Repository is created, deleted (organization hooks only), archived, unarchived, made public, or made private.
-        <<: *event
-      # TODO add more events here ...
-    run:
-      command: ["FLASK_APP=server.py", "flask", "run"]
-      port: 5000
+        http:
+          port: 8000
+          subscribe:
+            method: post
+            path: /subscribe
+            contentType: application/json
+          unsubscribe:
+            path: /unsubscribe
+            method: post
+            contentType: application/json
 
 environment:
   # TODO github apps
   OAUTH_TOKEN:
-    help: A user oauth token.
+    help: A user oauth token to be used if not provided during an action.
     type: string
   WEBHOOK_SECRET:
     help: Used to check the webhook payload signature.
