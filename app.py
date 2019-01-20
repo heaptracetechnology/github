@@ -3,9 +3,12 @@
 import os
 import sys
 import json
+import hmac
 import requests
+from hashlib import sha1
+from urllib.parse import urlencode
 
-from flask import Flask, request
+from flask import Flask, request, redirect
 
 
 app = Flask(__name__)
@@ -20,9 +23,6 @@ if os.getenv('OMG_STATSD_HOST'):
     )
 else:
     statsd = None
-
-
-listeners = {}
 
 
 class GitHub:
@@ -79,27 +79,6 @@ class GitHub:
             data=query, **kwargs
         )
 
-    @staticmethod
-    def webhook(req):
-        # TODO X-Hub-Signature
-        event = req.headers['X-Github-Event']
-        data = json.dumps(dict(
-            eventType=f'github.webhook.{event}',
-            contentType='application/vnd.omg.object+json',
-            eventID=req.headers['X-Github-Delivery'],
-            data=req.json
-        ))
-        sends = 0
-        for listener in listeners.values():
-            if listener.get('events') is None or event in listener['events']:
-                sends = sends + 1
-                requests.post(
-                    listener['endpoint'] or os.getenv('OMG_ENDPOINT'),
-                    data=data,
-                    headers={'Content-Type': 'application/json'}
-                )
-        return f'{sends} listeners got notifications.'
-
 
 @app.route('/api', methods=['POST'])
 def api():
@@ -111,24 +90,50 @@ def graphql():
     return GitHub.graphql(**request.json)
 
 
-@app.route('/subscribe', methods=['POST'])
-def subscribe():
+@app.route('/validate', methods=['POST'])
+def validate():
+    signature = request.json['X-Hub-Signature']
+    assert signature
+    sha_name, signature = signature.split('=')
+    assert sha_name == 'sha1'
+    mac = hmac.new(
+        os.getenv('WEBHOOK_SECRET'),
+        msg=request.json['body'],
+        digestmod='sha1'
+    )
+    return str(str(mac.hexdigest()) == str(signature))
+
+
+@app.route('/login_redirect', methods=['GET'])
+def login_redirect():
+    data = request.json
+    query = dict(
+        scope=','.join(data['scope']),
+        state=data.get('state', None),
+        client_id=os.getenv('CLIENT_ID'),
+        redirect_uri=data['redirect']
+    )
+    return f'https://github.com/login/oauth/authorize?{urlencode(query)}'
+
+
+@app.route('/login_token', methods=['POST'])
+def login_token():
     body = request.json
-    listeners[body['id']] = body
-    return 'Subscribed'
-
-
-@app.route('/unsubscribe', methods=['POST'])
-def unsubscribe():
-    if listeners.pop(request.json['id'], False): return 'Unsubscribed'
-    else:
-        return 'No subscription found.'
-
-
-@app.route('/webhooks', methods=['POST'])
-def webhooks():
-    # webhooks from Gitub.com
-    return GitHub.webhook(request)
+    res = requests.post(
+        'https://github.com/login/oauth/access_token',
+        data=json.dumps(dict(
+            client_id=os.getenv('CLIENT_ID'),
+            client_secret=os.getenv('CLIENT_SECRET'),
+            code=body['code'],
+            state=body['state']
+        )),
+        headers={
+            'Content-Type': 'application/json; charset=utf-8',
+            'Accept': 'application/json',
+            'User-Agent': os.getenv('USER_AGENT', 'Undefined')
+        }
+    )
+    return res.json()['access_token']
 
 
 if __name__ == '__main__':

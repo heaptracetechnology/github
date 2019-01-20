@@ -24,8 +24,25 @@ Create a server to accept GitHub Webhooks.
 
 #### Example Asyncy Usage
 ```storyscript
-github webhooks as client
-    when client push as result
-        # a new push payload was received
-        # ...
+# GitHub Oauth Login
+http server
+  when listen path:'/login/github' as req
+    url = github login_redirect scope:['repo']
+                                redirect:'{req.url}/oauth_success'
+    req redirect :url
+
+  when listen path:'/login/github/oauth_success' as req
+    token = github login_token code:req.arguments['code']
+    user = github api :token url:'/user'
+    user.login  # the github.com/username
+
+# GitHub Webhook Handler
+http server
+  when listen path:'/github/webhooks' method:'post' as req
+    if github validate signature:req.headers['X-Hub-Signature']
+                       body:req.body_raw
+      # payload is ok
+    else
+      # payload is not valid
+
 ```

@@ -66,30 +66,60 @@ actions:
       method: post
       path: /graphql
 
-  webhooks:
-    help: Accept GitHub webhooks as events
-    events:
-      accept:
-        arguments:
-          events:
-            type: list
-            in: requestBody
-            help: |
-              List events to subscribe too.
-              See full list here https://developer.github.com/webhooks/#events
-              Default is all events.
-        output:
-          type: map
-        http:
-          port: 8000
-          subscribe:
-            method: post
-            path: /subscribe
-            contentType: application/json
-          unsubscribe:
-            path: /unsubscribe
-            method: post
-            contentType: application/json
+  login_redirect:
+    help: |
+      Return the GitHub redirect url for login
+    arguments:
+      scope:
+        type: list
+        in: requestBody
+        help: List of scopes to use during login
+      redirect:
+        type: string
+        in: requestBody
+        help: Where GitHub redirects successful logins to
+    http:
+      port: 8000
+      method: post
+      path: /login_redirect
+      contentType: application/json
+
+  login_token:
+    help: Return the GitHub redirect url for login
+    arguments:
+      code:
+        type: string
+        in: requestBody
+        help: The code provided in the query of GitHub oauth call
+      state:
+        type: string
+        in: requestBody
+        help: A unique key for state tracking
+    http:
+      port: 8000
+      method: post
+      path: /login_token
+      contentType: application/json
+
+  validate:
+    help: Validate webhooks signature
+    arguments:
+      signature:
+        type: string
+        required: true
+        in: requestBody
+        help: |
+          Found in X-Hub-Signature in the request header
+      body:
+        type: map
+        in: requestBody
+        help: |
+          The request body from GitHub
+    http:
+      port: 8000
+      method: post
+      path: /validate
+      contentType: application/json
 
 environment:
   # TODO github apps
