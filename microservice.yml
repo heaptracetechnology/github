@@ -66,25 +66,34 @@ actions:
       method: post
       path: /graphql
 
-  login_redirect:
+  oauthRedirect:
     help: |
       Return the GitHub redirect url for login
     arguments:
       scope:
         type: list
         in: requestBody
-        help: List of scopes to use during login
+        help: |
+          List of scopes to use during login.
+          https://developer.github.com/apps/building-oauth-apps/understanding-scopes-for-oauth-apps/
       redirect:
         type: string
         in: requestBody
         help: Where GitHub redirects successful logins to
+      state:
+        trpe: string
+        in: requestBody
+        help: An unguessable random string. It is used to protect against cross-site request forgery attacks.
+    output:
+      type: string
+      # help: The full url to redirect for GitHub Login
     http:
       port: 8000
       method: post
       path: /login_redirect
       contentType: application/json
 
-  login_token:
+  oauthGetAccessToken:
     help: Return the GitHub redirect url for login
     arguments:
       code:
@@ -95,21 +104,24 @@ actions:
         type: string
         in: requestBody
         help: A unique key for state tracking
+    output:
+      type: string
+      # help: The GitHub oauth token, this variable should be kept secret
+      # sensative: true
     http:
       port: 8000
       method: post
       path: /login_token
       contentType: application/json
 
-  validate:
+  webhookValidate:
     help: Validate webhooks signature
     arguments:
-      signature:
-        type: string
+      headers:
+        type: map
         required: true
         in: requestBody
-        help: |
-          Found in X-Hub-Signature in the request header
+        help: The http headers provided by the GitHub http request
       body:
         type: map
         in: requestBody
@@ -118,7 +130,7 @@ actions:
     http:
       port: 8000
       method: post
-      path: /validate
+      path: /webhook_validate
       contentType: application/json
 
 environment:

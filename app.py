@@ -90,10 +90,10 @@ def graphql():
     return GitHub.graphql(**request.json)
 
 
-@app.route('/validate', methods=['POST'])
-def validate():
-    signature = request.json['X-Hub-Signature']
-    assert signature
+@app.route('/webhook_validate', methods=['POST'])
+def webhook_validate():
+    signature = request.json['headers'].get('X-Hub-Signature')
+    assert signature, 'X-Hub-Signature not found in the header.'
     sha_name, signature = signature.split('=')
     assert sha_name == 'sha1'
     mac = hmac.new(
@@ -108,10 +108,10 @@ def validate():
 def login_redirect():
     data = request.json
     query = dict(
-        scope=','.join(data['scope']),
+        scope=','.join(data['scope']) if data['scope'] else None,
         state=data.get('state', None),
         client_id=os.getenv('CLIENT_ID'),
-        redirect_uri=data['redirect']
+        redirect_uri=data.get('redirect')
     )
     return f'https://github.com/login/oauth/authorize?{urlencode(query)}'
 
