@@ -3,9 +3,12 @@
 import os
 import sys
 import json
+import jwt
 import hmac
 import requests
+from time import time
 from hashlib import sha1
+from base64 import b64decode
 from urllib.parse import urlencode
 
 from flask import Flask, request, redirect
@@ -13,6 +16,9 @@ from flask import Flask, request, redirect
 
 app = Flask(__name__)
 
+UA = os.getenv('USER_AGENT', 'Undefined')
+HOSTNAME = os.getenv('HOSTNAME', 'github.com')
+API = os.getenv('API_HOSTNAME', f'api.{HOSTNAME}')
 
 if os.getenv('OMG_STATSD_HOST'):
     import statsd as Statsd
@@ -26,26 +32,52 @@ else:
 
 
 class GitHub:
-    rest_url = f'https://{os.getenv("API_HOSTNAME")}'
-    graphql_url = f'https://{os.getenv("API_HOSTNAME")}/graphql'
+    rest_url = f'https://{API}'
+    graphql_url = f'https://{API}/graphql'
 
     @staticmethod
-    def make_headers(headers, token):
+    def create_app_token(iid):
+        now = int(time())
+
+        token = jwt.encode({
+                'iat': now,
+                'exp': now + 60,
+                'iss': os.getenv('APP_ID')
+            }, b64decode(os.getenv('APP_PRIVATE_KEY')), algorithm='RS256')
+
+        res = GitHub._query(
+            f'{GitHub.rest_url}/installations/{iid}/access_tokens',
+            method='post',
+            token=token.decode('utf-8'),
+            headers={
+                'Accept': 'application/vnd.github.machine-man-preview+json'
+            }
+        )
+        return res.json()['token']
+
+    @staticmethod
+    def make_headers(headers, token, iid):
         if headers is None:
             headers = {}
 
-        if token:
-            headers['Authorization'] = f"token {token}"
-        else:
-            headers['Authorization'] =f"token {os.getenv('OAUTH_TOKEN')}"
+        if iid:
+            token = GitHub.create_app_token(iid)
+            headers['Accept'] = 'application/vnd.github.machine-man-preview+json'
 
-        headers.setdefault('User-Agent', os.getenv('USER_AGENT', 'Undefined'))
+        if token:
+            headers['Authorization'] = f"Bearer {token}"
+
+        else:
+            headers['Authorization'] =f"Bearer {os.getenv('OAUTH_TOKEN')}"
+
+        headers.setdefault('User-Agent', UA)
 
         return headers
 
     @staticmethod
-    def _query(url, method, token=None, headers=None, *args, **kwargs):
-        headers = GitHub.make_headers(headers, token)
+    def _query(url, method, token=None,
+               iid=None, headers=None, *args, **kwargs):
+        headers = GitHub.make_headers(headers, token, iid)
         res = getattr(requests, method)(url, *args, headers=headers, **kwargs)
 
         if statsd:
@@ -63,21 +95,21 @@ class GitHub:
             sys.stderr.write(res.text)
             raise
         else:
-            return res.text
+            return res
 
     @staticmethod
     def api(url, **kwargs):
         return GitHub._query(
             '/'.join([GitHub.rest_url, url.lstrip('/')]),
             **kwargs
-        )
+        ).text
 
     @staticmethod
     def graphql(query, **kwargs):
         return GitHub._query(
             GitHub.graphql_url, 'post',
             data=query, **kwargs
-        )
+        ).text
 
 
 @app.route('/api', methods=['POST'])
@@ -116,14 +148,14 @@ def login_redirect():
         client_id=os.getenv('CLIENT_ID'),
         redirect_uri=data.get('redirect')
     )
-    return f'https://github.com/login/oauth/authorize?{urlencode(query)}'
+    return f'https://{HOSTNAME}/login/oauth/authorize?{urlencode(query)}'
 
 
 @app.route('/login_token', methods=['POST'])
 def login_token():
     body = request.json
     res = requests.post(
-        f'https://{os.getenv("HOSTNAME")}/login/oauth/access_token',
+        f'https://{HOSTNAME}/login/oauth/access_token',
         data=json.dumps(dict(
             client_id=os.getenv('CLIENT_ID'),
             client_secret=os.getenv('CLIENT_SECRET'),
@@ -133,7 +165,7 @@ def login_token():
         headers={
             'Content-Type': 'application/json; charset=utf-8',
             'Accept': 'application/json',
-            'User-Agent': os.getenv('USER_AGENT', 'Undefined')
+            'User-Agent': UA
         }
     )
     return res.json()['access_token']

@@ -7,7 +7,6 @@ actions:
     help: Make an API request to the GitHub REST API
     arguments:
       method:
-        required: true
         type: string
         in: requestBody
         default: get
@@ -36,6 +35,10 @@ actions:
         type: string
         help: A oauth user access token to use during the request for authentication.
         in: requestBody
+      iid:
+        type: int
+        help: The GitHub App installation ID to use during authentication.
+        in: requestBody
     output:
       type: map
     http:
@@ -57,6 +60,10 @@ actions:
       token:
         type: string
         help: A oauth user access token to use during the request for authentication.
+        in: requestBody
+      iid:
+        type: int
+        help: The GitHub App installation ID to use during authentication.
         in: requestBody
     output:
       type: map
@@ -81,7 +88,7 @@ actions:
         in: requestBody
         help: Where GitHub redirects successful logins to
       state:
-        trpe: string
+        type: string
         in: requestBody
         help: An unguessable random string. It is used to protect against cross-site request forgery attacks.
     output:
@@ -142,14 +149,20 @@ actions:
 
 environment:
   APP_ID:
-    help: The GitHub App ID
+    help: Your GitHub App ID
     type: int
+  APP_PRIVATE_KEY:
+    help: Your GitHub App private key in PEM format
+    type: string
+    # secret: true
   HOSTNAME:
     help: The GitHub Hostname (for GitHub Enterprise)
     type: string
   API_HOSTNAME:
-    help: The GitHub API Hostname (for GitHub Enterprise)
     type: string
+    help: |
+      The GitHub API Hostname (for GitHub Enterprise)
+      Default to "api.HOSTNAME"
   CLIENT_ID:
     help: The GitHub Oauth Client ID
     type: string
@@ -168,4 +181,4 @@ environment:
   USER_AGENT:
     help: GitHub requires a the User-Agent header defined.
     type: string
-    default: 'Undefined'
+    default: Undefined

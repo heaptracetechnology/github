@@ -1,3 +1,5 @@
 requests
 statsd
 flask
+PyJWT
+cryptography
