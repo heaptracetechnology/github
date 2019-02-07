@@ -123,10 +123,17 @@ actions:
         in: requestBody
         help: The http headers provided by the GitHub http request
       body:
-        type: map
+        type: string
+        required: true
         in: requestBody
-        help: |
-          The request body from GitHub
+        help: The raw request body from GitHub
+    output:
+      type: object
+      properties:
+        valid:
+          type: boolean
+        event:
+          type: string
     http:
       port: 8000
       method: post
@@ -134,14 +141,31 @@ actions:
       contentType: application/json
 
 environment:
-  # TODO github apps
+  APP_ID:
+    help: The GitHub App ID
+    type: int
+  HOSTNAME:
+    help: The GitHub Hostname (for GitHub Enterprise)
+    type: string
+  API_HOSTNAME:
+    help: The GitHub API Hostname (for GitHub Enterprise)
+    type: string
+  CLIENT_ID:
+    help: The GitHub Oauth Client ID
+    type: string
+  CLIENT_SECRET:
+    help: The GitHub Oauth Client Secret
+    type: string
+    # secret: true
   OAUTH_TOKEN:
     help: A user oauth token to be used if not provided during an action.
     type: string
+    # secret: true
   WEBHOOK_SECRET:
     help: Used to check the webhook payload signature.
     type: string
+    # secret: true
   USER_AGENT:
     help: GitHub requires a the User-Agent header defined.
     type: string
-    default: 'Not Defined'
+    default: 'Undefined'

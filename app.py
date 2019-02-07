@@ -26,8 +26,8 @@ else:
 
 
 class GitHub:
-    rest_url = 'https://api.github.com'
-    graphql_url = 'https://api.github.com/graphql'
+    rest_url = f'https://{os.getenv("API_HOSTNAME")}'
+    graphql_url = f'https://{os.getenv("API_HOSTNAME")}/graphql'
 
     @staticmethod
     def make_headers(headers, token):
@@ -92,6 +92,7 @@ def graphql():
 
 @app.route('/webhook_validate', methods=['POST'])
 def webhook_validate():
+    assert request.json['headers'].get('X-GitHub-Event')
     signature = request.json['headers'].get('X-Hub-Signature')
     assert signature, 'X-Hub-Signature not found in the header.'
     sha_name, signature = signature.split('=')
@@ -101,7 +102,9 @@ def webhook_validate():
         msg=request.json['body'],
         digestmod='sha1'
     )
-    return str(str(mac.hexdigest()) == str(signature))
+    return dumps({
+        'valid': str(mac.hexdigest()) == str(signature),
+        'event': request.json['headers']['X-GitHub-Event']})
 
 
 @app.route('/login_redirect', methods=['GET'])
@@ -120,7 +123,7 @@ def login_redirect():
 def login_token():
     body = request.json
     res = requests.post(
-        'https://github.com/login/oauth/access_token',
+        f'https://{os.getenv("HOSTNAME")}/login/oauth/access_token',
         data=json.dumps(dict(
             client_id=os.getenv('CLIENT_ID'),
             client_secret=os.getenv('CLIENT_SECRET'),
