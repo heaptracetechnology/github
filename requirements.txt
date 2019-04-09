@@ -1,5 +1,5 @@
 requests
 statsd
-flask
+responder
 PyJWT
 cryptography
