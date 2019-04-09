@@ -16,6 +16,6 @@ when github server webhook events:['push'] as event
     repo = event.payload['repository']
 
 # Login made easy.
-when github server login scope:['user'] redirect:'https://...' as user
-    token = user.access_token
+when github server login scope:['user'] redirect:'https://...' as access_token
+    user = github api url:'/user' token:access_token
 ```

@@ -108,7 +108,8 @@ actions:
             in: requestBody
             help: url to redirect the user after succeful login
         output:
-          type: object
+          type: string
+          help: The users secret access token
         http:
           port: 5042
           subscribe:

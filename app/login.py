@@ -53,9 +53,9 @@ async def login(req, resp):
             data=dumps(dict(
                 eventType='github.login',
                 cloudEventsVersion='0.1',
-                contentType='application/vnd.omg.object+json',
+                contentType='text/plain',
                 eventID='123abc',
-                data={'access_token': res.json()['access_token']}
+                data=res.json()['access_token']
             ))
         )
 
