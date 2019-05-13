@@ -70,7 +70,7 @@ async def unsubscribe(req, resp):
     resp.text = 'Unsubscribed'
 
 
-@api.route('/webhooks/server')
+@api.route('/webhooks')
 async def webhooks(req, resp):
     """
     Handle incoming GitHub webhooks

@@ -1,4 +1,5 @@
 omg: 1
+
 lifecycle:
   startup:
     command: ["python", "/app/app.py"]
@@ -11,15 +12,15 @@ info:
     name: MIT
     url: https://opensource.org/licenses/MIT
 
-expose:
+forward:
   webhooks:
     http:
-      path: /webhooks/server
+      path: /webhooks
       port: 5042
-  login:
-    http:
-      path: /login/server
-      port: 5042
+  # login:
+  #   http:
+  #     path: /login
+  #     port: 5042
 
 actions:
   api:
@@ -92,36 +93,36 @@ actions:
       method: post
       path: /graphql
 
-  server:
-    help: Server for GitHub login and webhooks
+  events:
+    help: Server for GitHub webhooks
     events:
-      login:
-        arguments:
-          scope:
-            type: list
-            in: requestBody
-            help: |
-              List of scopes during login
-              https://developer.github.com/apps/building-oauth-apps/understanding-scopes-for-oauth-apps/
-          redirect:
-            type: string
-            in: requestBody
-            help: url to redirect the user after succeful login
-        output:
-          type: string
-          help: The users secret access token
-        http:
-          port: 5042
-          subscribe:
-            method: post
-            path: /login/subscribe
-            contentType: application/json
-          unsubscribe:
-            method: post
-            path: /login/unsubscribe
-            contentType: application/json
+      # login:
+      #   arguments:
+      #     scope:
+      #       type: list
+      #       in: requestBody
+      #       help: |
+      #         List of scopes during login
+      #         https://developer.github.com/apps/building-oauth-apps/understanding-scopes-for-oauth-apps/
+      #     redirect:
+      #       type: string
+      #       in: requestBody
+      #       help: url to redirect the user after succeful login
+      #   output:
+      #     type: string
+      #     # help: The users secret access token
+      #   http:
+      #     port: 5042
+      #     subscribe:
+      #       method: post
+      #       path: /login/subscribe
+      #       contentType: application/json
+      #     unsubscribe:
+      #       method: post
+      #       path: /login/unsubscribe
+      #       contentType: application/json
 
-      webhook:
+      webhooks:
         arguments:
           events:
             type: list
